@@ -115,13 +115,13 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('timestamp can only be of types float or a unicode or string representation of a float')
+                raise ValueError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
             else:
                 self.__timestamp = value
-        elif isinstance(value, float):
+        elif isinstance(value, (int, float, long)):
             self.__timestamp = repr(round(value, 3))
         else:
-            raise ValueError('timestamp can only be of types float or a unicode or string representation of a float')
+            raise ValueError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
 
     @property
     def clientTime(self):
@@ -135,13 +135,13 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('clientTime can only be of types None, float or a unicode or string representation of a float')
+                raise ValueError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
             else:
                 self.__clientTime = value
-        elif isinstance(value, float):
+        elif isinstance(value, (int, float, long)):
             self.__clientTime = repr(round(value, 3))
         else:
-            raise ValueError('clientTime can only be of types None, float or a unicode or string representation of a float')
+            raise ValueError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
 
     @property
     def mid(self):
