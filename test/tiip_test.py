@@ -132,7 +132,7 @@ class TestTIIPMessage(unittest.TestCase):
 
         # Incorrect
         tiipMessage = TIIPMessage()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.timestamp = None
         with self.assertRaises(ValueError):
             tiipMessage.timestamp = 'incorrectTimestampString'
@@ -157,6 +157,8 @@ class TestTIIPMessage(unittest.TestCase):
         tiipMessage = TIIPMessage()
         with self.assertRaises(ValueError):
             tiipMessage.clientTime = 'incorrectClientTimeStampString'
+        with self.assertRaises(TypeError):
+            tiipMessage.timestamp = dict()
 
     def test008_setMid(self):
         # Correct (str, unicode, None)
@@ -179,7 +181,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.sid, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.sid = 1
 
     def test010_setType(self):
@@ -193,7 +195,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.type, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.type = 1
 
     def test011_setSource(self):
@@ -205,7 +207,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.source, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.source = 1
 
     def test012_setPid(self):
@@ -219,7 +221,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.pid, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.pid = 1
 
     def test013_setTarget(self):
@@ -233,7 +235,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.target, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.target = 1
 
     def test014_setSubTarget(self):
@@ -247,7 +249,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.subTarget, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.subTarget = 1
 
     def test015_setSignal(self):
@@ -261,7 +263,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.signal, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.signal = 1
 
     def test016_setArguments(self):
@@ -273,7 +275,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.arguments, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.arguments = 1
 
     def test017_setPayload(self):
@@ -285,7 +287,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.payload, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.payload = 1
 
     def test018_setOk(self):
@@ -297,7 +299,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.ok, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.ok = 1
 
     def test019_setTenant(self):
@@ -311,7 +313,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMessage.tenant, None)
 
         # Incorrect
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             tiipMessage.tenant = 1
 
     def test020_strCast(self):

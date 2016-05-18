@@ -13,6 +13,15 @@ class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
     def __init__(self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None, source=None,
                  pid=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None):
+        """
+        @param tiipStr: A string representation of a TIIPMessage to load on init
+        @param tiipDict: A dictionary representation of a TIIPMessage to load on init
+        All other arguments are keys to set in the TIIPMessage, see TIIP specification for more details:
+            https://github.com/whitelizard/tiip
+
+        Constructor can raise the following Exceptions:
+            TypeError, ValueError
+        """
         # Protocol keys
         self.__protocol = __version__
         self.__timestamp = repr(self.__getTimeStamp())
@@ -115,13 +124,13 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
+                raise ValueError('timestamp string must be parseable as float')
             else:
                 self.__timestamp = value
         elif isinstance(value, (int, float, long)):
             self.__timestamp = repr(round(value, 3))
         else:
-            raise ValueError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
+            raise TypeError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
 
     @property
     def clientTime(self):
@@ -135,13 +144,13 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
+                raise ValueError('clientTime string must be a parseable as float')
             else:
                 self.__clientTime = value
         elif isinstance(value, (int, float, long)):
             self.__clientTime = repr(round(value, 3))
         else:
-            raise ValueError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
+            raise TypeError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
 
     @property
     def mid(self):
@@ -154,7 +163,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__mid = value
         else:
-            raise ValueError('mid can only be of types unicode, str or None')
+            raise TypeError('mid can only be of types unicode, str or None')
 
     @property
     def sid(self):
@@ -167,7 +176,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__sid = value
         else:
-            raise ValueError('sid can only be of types unicode, str or None')
+            raise TypeError('sid can only be of types unicode, str or None')
 
     @property
     def type(self):
@@ -180,7 +189,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__type = value
         else:
-            raise ValueError('type can only be of types unicode, str or None')
+            raise TypeError('type can only be of types unicode, str or None')
 
     @property
     def source(self):
@@ -193,7 +202,7 @@ class TIIPMessage(object):
         elif isinstance(value, list):
             self.__source = value
         else:
-            raise ValueError('source can only be of types list or None')
+            raise TypeError('source can only be of types list or None')
 
     # DEPRECATED!
     @property
@@ -208,7 +217,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__pid = value
         else:
-            raise ValueError('pid can only be of types unicode, str or None')
+            raise TypeError('pid can only be of types unicode, str or None')
 
     @property
     def target(self):
@@ -221,7 +230,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__target = value
         else:
-            raise ValueError('target can only be of types unicode, str or None')
+            raise TypeError('target can only be of types unicode, str or None')
 
     @property
     def subTarget(self):
@@ -234,7 +243,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__subTarget = value
         else:
-            raise ValueError('subTarget can only be of types unicode, str or None')
+            raise TypeError('subTarget can only be of types unicode, str or None')
 
     @property
     def signal(self):
@@ -247,7 +256,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__signal = value
         else:
-            raise ValueError('signal can only be of types unicode, str or None')
+            raise TypeError('signal can only be of types unicode, str or None')
 
     @property
     def arguments(self):
@@ -260,7 +269,7 @@ class TIIPMessage(object):
         elif isinstance(value, dict):
             self.__arguments = value
         else:
-            raise ValueError('arguments can only be of types dict or None')
+            raise TypeError('arguments can only be of types dict or None')
 
     @property
     def payload(self):
@@ -273,7 +282,7 @@ class TIIPMessage(object):
         elif isinstance(value, list):
             self.__payload = value
         else:
-            raise ValueError('payload can only be of types dict or None')
+            raise TypeError('payload can only be of types dict or None')
 
     @property
     def ok(self):
@@ -286,7 +295,7 @@ class TIIPMessage(object):
         elif isinstance(value, bool):
             self.__ok = value
         else:
-            raise ValueError('ok can only be of types bool or None')
+            raise TypeError('ok can only be of types bool or None')
 
     @property
     def tenant(self):
@@ -299,7 +308,7 @@ class TIIPMessage(object):
         elif isinstance(value, basestring):
             self.__tenant = value
         else:
-            raise ValueError('tenant can only be of types unicode, str or None')
+            raise TypeError('tenant can only be of types unicode, str or None')
 
     def loadFromStr(self, tiipStr):
         tiipDict = json.loads(tiipStr)
