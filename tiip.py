@@ -16,15 +16,13 @@ class TIIPMessage(object):
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
+        @raise: TypeError, ValueError
         All other arguments are keys to set in the TIIPMessage, see TIIP specification for more details:
             https://github.com/whitelizard/tiip
-
-        Constructor can raise the following Exceptions:
-            TypeError, ValueError
         """
         # Protocol keys
         self.__protocol = __version__
-        self.__timestamp = repr(self.__getTimeStamp())
+        self.__timestamp = self.__getTimeStamp()
         self.__clientTime = None
         self.__mid = None
         self.__sid = None
@@ -108,7 +106,11 @@ class TIIPMessage(object):
 
     @staticmethod
     def __getTimeStamp():
-        return round(time.time(), 3)
+        """
+        Creates a timestamp string representation according to the TIIP-specification for timestamps.
+        @return:
+        """
+        return repr(round(time.time(), 3))
 
     @property
     def protocol(self):
@@ -124,7 +126,7 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('timestamp string must be parseable as float')
+                raise ValueError('timestamp string must be parseable to float')
             else:
                 self.__timestamp = value
         elif isinstance(value, (int, float, long)):
@@ -144,7 +146,7 @@ class TIIPMessage(object):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('clientTime string must be a parseable as float')
+                raise ValueError('clientTime string must be parseable to float')
             else:
                 self.__clientTime = value
         elif isinstance(value, (int, float, long)):
@@ -311,10 +313,22 @@ class TIIPMessage(object):
             raise TypeError('tenant can only be of types unicode, str or None')
 
     def loadFromStr(self, tiipStr):
+        """
+        Loads this object with values from a string or unicode representation of a TIIPMessage.
+        @param tiipStr: The string to load properties from.
+        @raise: TypeError, ValueError
+        @return: None
+        """
         tiipDict = json.loads(tiipStr)
         self.loadFromDict(tiipDict)
 
     def loadFromDict(self, tiipDict):
+        """
+        Loads this object with values from a dictionary representation of a TIIPMessage.
+        @param tiipDict: The dictionary to load properties from.
+        @raise: TypeError, ValueError
+        @return: None
+        """
         if 'timestamp' in tiipDict:
             self.timestamp = tiipDict['timestamp']
         if 'clientTime' in tiipDict:
