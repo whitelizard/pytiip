@@ -6,13 +6,14 @@ import json
 import time
 
 
-__version__ = 'tiip0.9'
+__version__ = 'tiip1.0'
 
 
 class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
-    def __init__(self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None, source=None,
-                 pid=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None):
+    def __init__(
+            self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
+            source=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None):
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
@@ -28,7 +29,6 @@ class TIIPMessage(object):
         self.__sid = None
         self.__type = None
         self.__source = None
-        self.__pid = None  # DEPRECATED!
         self.__target = None
         self.__subTarget = None
         self.__signal = None
@@ -54,8 +54,6 @@ class TIIPMessage(object):
             self.type = type
         if source is not None:
             self.source = source
-        if pid is not None:
-            self.pid = pid  # DEPRECATED!
         if target is not None:
             self.target = target
         if subTarget is not None:
@@ -87,8 +85,6 @@ class TIIPMessage(object):
             yield 'type', self.__type
         if self.__source is not None:
             yield 'source', self.__source
-        if self.__pid is not None:  # DEPRECATED!
-            yield 'pid', self.__pid
         if self.__target is not None:
             yield 'target', self.__target
         if self.__subTarget is not None:
@@ -205,21 +201,6 @@ class TIIPMessage(object):
             self.__source = value
         else:
             raise TypeError('source can only be of types list or None')
-
-    # DEPRECATED!
-    @property
-    def pid(self):
-        return self.__pid
-
-    # DEPRECATED!
-    @pid.setter
-    def pid(self, value):
-        if value is None:
-            self.__pid = None
-        elif isinstance(value, basestring):
-            self.__pid = value
-        else:
-            raise TypeError('pid can only be of types unicode, str or None')
 
     @property
     def target(self):
@@ -341,8 +322,6 @@ class TIIPMessage(object):
             self.type = tiipDict['type']
         if 'source' in tiipDict:
             self.source = tiipDict['source']
-        if 'pid' in tiipDict:
-            self.pid = tiipDict['pid']
         if 'target' in tiipDict:
             self.target = tiipDict['target']
         if 'subTarget' in tiipDict:
