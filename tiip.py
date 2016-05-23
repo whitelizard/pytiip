@@ -265,7 +265,7 @@ class TIIPMessage(object):
         elif isinstance(value, list):
             self.__payload = value
         else:
-            raise TypeError('payload can only be of types dict or None')
+            raise TypeError('payload can only be of types list or None')
 
     @property
     def ok(self):
