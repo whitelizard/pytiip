@@ -6,14 +6,16 @@ import json
 import time
 
 
-__version__ = 'tiip1.0'
+__version__ = 'tiip.1.0'  # TIIP protocol version
 
 
 class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
     def __init__(
             self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
-            source=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None):
+            source=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None,
+            verifyVersion=False):
+        # TODO: verifyVersion should be default True before release.
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
@@ -39,9 +41,9 @@ class TIIPMessage(object):
 
         # Parse constructor arguments
         if tiipStr is not None:
-            self.loadFromStr(tiipStr)
+            self.loadFromStr(tiipStr, verifyVersion)
         if tiipDict is not None:
-            self.loadFromDict(tiipDict)
+            self.loadFromDict(tiipDict, verifyVersion)
         if timestamp is not None:
             self.timestamp = timestamp
         if clientTime is not None:
@@ -293,23 +295,29 @@ class TIIPMessage(object):
         else:
             raise TypeError('tenant can only be of types unicode, str or None')
 
-    def loadFromStr(self, tiipStr):
+    def loadFromStr(self, tiipStr, verifyVersion=True):
         """
         Loads this object with values from a string or unicode representation of a TIIPMessage.
         @param tiipStr: The string to load properties from.
+        @param verifyVersion: True to verify that tiipDict has the right protocol
         @raise: TypeError, ValueError
         @return: None
         """
         tiipDict = json.loads(tiipStr)
-        self.loadFromDict(tiipDict)
+        self.loadFromDict(tiipDict, verifyVersion)
 
-    def loadFromDict(self, tiipDict):
+    def loadFromDict(self, tiipDict, verifyVersion=True):
         """
         Loads this object with values from a dictionary representation of a TIIPMessage.
         @param tiipDict: The dictionary to load properties from.
+        @param verifyVersion: True to verify that tiipDict has the right protocol
         @raise: TypeError, ValueError
         @return: None
         """
+        if verifyVersion:
+            if 'protocol' not in tiipDict or tiipDict['protocol'] != self.__protocol:
+                raise ValueError(
+                    'Incorrect tiip version "' + str(tiipDict['protocol']) + '" expected "' + self.__protocol + '"')
         if 'timestamp' in tiipDict:
             self.timestamp = tiipDict['timestamp']
         if 'clientTime' in tiipDict:
