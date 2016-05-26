@@ -6,7 +6,7 @@ import json
 import time
 
 
-__version__ = 'tiip0.9'
+__version__ = 'tiip.0.9'
 
 
 class TIIPMessage(object):
