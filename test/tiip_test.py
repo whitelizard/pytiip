@@ -21,6 +21,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.target = u'testTarget'
         self.subTarget = u'testSubTarget'
         self.signal = u'testSignal'
+        self.channel = u'testChannel'
         self.arguments = {u'testArgument1': u'testArgumentValue1', u'testArgument2': u'testArgumentValue2'}
         self.payload = [u'testPayloadValue1', u'testPayloadValue2']
         self.ok = True
@@ -37,6 +38,7 @@ class TestTIIPMessage(unittest.TestCase):
             'target': self.target,
             'subTarget': self.subTarget,
             'signal': self.signal,
+            'channel': self.channel,
             'arguments': self.arguments,
             'payload': self.payload,
             'ok': self.ok,
@@ -55,7 +57,7 @@ class TestTIIPMessage(unittest.TestCase):
     def generateExampleTIIPMessage(self):
         return TIIPMessage(
             timestamp=self.timestamp, clientTime=self.clientTime, mid=self.mid, sid=self.sid, type=self.type,
-            source=self.source, target=self.target, subTarget=self.subTarget, signal=self.signal,
+            source=self.source, target=self.target, subTarget=self.subTarget, signal=self.signal, channel=self.channel,
             arguments=self.arguments, payload=self.payload, ok=self.ok, tenant=self.tenant)
 
     def verifyKeys(self, tiipMsg):
@@ -68,6 +70,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEquals(tiipMsg.target, self.target)
         self.assertEquals(tiipMsg.subTarget, self.subTarget)
         self.assertEquals(tiipMsg.signal, self.signal)
+        self.assertEquals(tiipMsg.channel, self.channel)
         self.assertEquals(tiipMsg.arguments, self.arguments)
         self.assertEquals(tiipMsg.payload, self.payload)
         self.assertEquals(tiipMsg.ok, self.ok)
@@ -307,6 +310,20 @@ class TestTIIPMessage(unittest.TestCase):
     def test020_dictCast(self):
         tiipMessage = self.generateExampleTIIPMessage()
         self.assertEquals(dict(tiipMessage), dict(self.tiipDict, protocol=self.tiipVersion))
+
+    def test021_setChannel(self):
+        # Correct (str, unicode, None)
+        tiipMessage = TIIPMessage()
+        tiipMessage.channel = str(self.channel)
+        self.assertEquals(tiipMessage.channel, self.channel)
+        tiipMessage.channel = self.channel
+        self.assertEquals(tiipMessage.channel, self.channel)
+        tiipMessage.channel = None
+        self.assertEquals(tiipMessage.channel, None)
+
+        # Incorrect
+        with self.assertRaises(TypeError):
+            tiipMessage.signal = 1
 
 if __name__ == "__main__":
     unittest.main()

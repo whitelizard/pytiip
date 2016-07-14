@@ -13,8 +13,8 @@ class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
     def __init__(
             self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
-            source=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None,
-            verifyVersion=False):
+            source=None, target=None, subTarget=None, signal=None, channel=None, arguments=None, payload=None, ok=None,
+            tenant=None, verifyVersion=False):
         # TODO: verifyVersion should be default True before release.
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
@@ -34,6 +34,7 @@ class TIIPMessage(object):
         self.__target = None
         self.__subTarget = None
         self.__signal = None
+        self.__channel = None
         self.__arguments = None
         self.__payload = None
         self.__ok = None
@@ -62,6 +63,8 @@ class TIIPMessage(object):
             self.subTarget = subTarget
         if signal is not None:
             self.signal = signal
+        if channel is not None:
+            self.channel = channel
         if arguments is not None:
             self.arguments = arguments
         if payload is not None:
@@ -93,6 +96,8 @@ class TIIPMessage(object):
             yield 'subTarget', self.__subTarget
         if self.__signal is not None:
             yield 'signal', self.__signal
+        if self.__channel is not None:
+            yield 'channel', self.__channel
         if self.__arguments is not None:
             yield 'arguments', self.__arguments
         if self.__payload is not None:
@@ -244,6 +249,19 @@ class TIIPMessage(object):
             raise TypeError('signal can only be of types unicode, str or None')
 
     @property
+    def channel(self):
+        return self.__channel
+
+    @channel.setter
+    def channel(self, value):
+        if value is None:
+            self.__channel = None
+        elif isinstance(value, basestring):
+            self.__channel = value
+        else:
+            raise TypeError('channel can only be of types unicode, str or None')
+
+    @property
     def arguments(self):
         return self.__arguments
 
@@ -336,6 +354,8 @@ class TIIPMessage(object):
             self.subTarget = tiipDict['subTarget']
         if 'signal' in tiipDict:
             self.signal = tiipDict['signal']
+        if 'channel' in tiipDict:
+            self.channel = tiipDict['channel']
         if 'arguments' in tiipDict:
             self.arguments = tiipDict['arguments']
         if 'payload' in tiipDict:
