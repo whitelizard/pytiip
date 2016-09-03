@@ -6,13 +6,16 @@ import json
 import time
 
 
-__version__ = 'tiip.0.9'
+__version__ = 'tiip.1.0'  # TIIP protocol version
 
 
 class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
-    def __init__(self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None, source=None,
-                 pid=None, target=None, subTarget=None, signal=None, arguments=None, payload=None, ok=None, tenant=None):
+    def __init__(
+            self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
+            source=None, target=None, subTarget=None, signal=None, channel=None, arguments=None, payload=None, ok=None,
+            tenant=None, verifyVersion=False):
+        # TODO: verifyVersion should be default True before release.
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
@@ -28,10 +31,10 @@ class TIIPMessage(object):
         self.__sid = None
         self.__type = None
         self.__source = None
-        self.__pid = None  # DEPRECATED!
         self.__target = None
         self.__subTarget = None
         self.__signal = None
+        self.__channel = None
         self.__arguments = None
         self.__payload = None
         self.__ok = None
@@ -39,9 +42,9 @@ class TIIPMessage(object):
 
         # Parse constructor arguments
         if tiipStr is not None:
-            self.loadFromStr(tiipStr)
+            self.loadFromStr(tiipStr, verifyVersion)
         if tiipDict is not None:
-            self.loadFromDict(tiipDict)
+            self.loadFromDict(tiipDict, verifyVersion)
         if timestamp is not None:
             self.timestamp = timestamp
         if clientTime is not None:
@@ -54,14 +57,14 @@ class TIIPMessage(object):
             self.type = type
         if source is not None:
             self.source = source
-        if pid is not None:
-            self.pid = pid  # DEPRECATED!
         if target is not None:
             self.target = target
         if subTarget is not None:
             self.subTarget = subTarget
         if signal is not None:
             self.signal = signal
+        if channel is not None:
+            self.channel = channel
         if arguments is not None:
             self.arguments = arguments
         if payload is not None:
@@ -87,14 +90,14 @@ class TIIPMessage(object):
             yield 'type', self.__type
         if self.__source is not None:
             yield 'source', self.__source
-        if self.__pid is not None:  # DEPRECATED!
-            yield 'pid', self.__pid
         if self.__target is not None:
             yield 'target', self.__target
         if self.__subTarget is not None:
             yield 'subTarget', self.__subTarget
         if self.__signal is not None:
             yield 'signal', self.__signal
+        if self.__channel is not None:
+            yield 'channel', self.__channel
         if self.__arguments is not None:
             yield 'arguments', self.__arguments
         if self.__payload is not None:
@@ -206,21 +209,6 @@ class TIIPMessage(object):
         else:
             raise TypeError('source can only be of types list or None')
 
-    # DEPRECATED!
-    @property
-    def pid(self):
-        return self.__pid
-
-    # DEPRECATED!
-    @pid.setter
-    def pid(self, value):
-        if value is None:
-            self.__pid = None
-        elif isinstance(value, basestring):
-            self.__pid = value
-        else:
-            raise TypeError('pid can only be of types unicode, str or None')
-
     @property
     def target(self):
         return self.__target
@@ -259,6 +247,19 @@ class TIIPMessage(object):
             self.__signal = value
         else:
             raise TypeError('signal can only be of types unicode, str or None')
+
+    @property
+    def channel(self):
+        return self.__channel
+
+    @channel.setter
+    def channel(self, value):
+        if value is None:
+            self.__channel = None
+        elif isinstance(value, basestring):
+            self.__channel = value
+        else:
+            raise TypeError('channel can only be of types unicode, str or None')
 
     @property
     def arguments(self):
@@ -312,23 +313,29 @@ class TIIPMessage(object):
         else:
             raise TypeError('tenant can only be of types unicode, str or None')
 
-    def loadFromStr(self, tiipStr):
+    def loadFromStr(self, tiipStr, verifyVersion=True):
         """
         Loads this object with values from a string or unicode representation of a TIIPMessage.
         @param tiipStr: The string to load properties from.
+        @param verifyVersion: True to verify that tiipDict has the right protocol
         @raise: TypeError, ValueError
         @return: None
         """
         tiipDict = json.loads(tiipStr)
-        self.loadFromDict(tiipDict)
+        self.loadFromDict(tiipDict, verifyVersion)
 
-    def loadFromDict(self, tiipDict):
+    def loadFromDict(self, tiipDict, verifyVersion=True):
         """
         Loads this object with values from a dictionary representation of a TIIPMessage.
         @param tiipDict: The dictionary to load properties from.
+        @param verifyVersion: True to verify that tiipDict has the right protocol
         @raise: TypeError, ValueError
         @return: None
         """
+        if verifyVersion:
+            if 'protocol' not in tiipDict or tiipDict['protocol'] != self.__protocol:
+                raise ValueError(
+                    'Incorrect tiip version "' + str(tiipDict['protocol']) + '" expected "' + self.__protocol + '"')
         if 'timestamp' in tiipDict:
             self.timestamp = tiipDict['timestamp']
         if 'clientTime' in tiipDict:
@@ -341,14 +348,14 @@ class TIIPMessage(object):
             self.type = tiipDict['type']
         if 'source' in tiipDict:
             self.source = tiipDict['source']
-        if 'pid' in tiipDict:
-            self.pid = tiipDict['pid']
         if 'target' in tiipDict:
             self.target = tiipDict['target']
         if 'subTarget' in tiipDict:
             self.subTarget = tiipDict['subTarget']
         if 'signal' in tiipDict:
             self.signal = tiipDict['signal']
+        if 'channel' in tiipDict:
+            self.channel = tiipDict['channel']
         if 'arguments' in tiipDict:
             self.arguments = tiipDict['arguments']
         if 'payload' in tiipDict:
