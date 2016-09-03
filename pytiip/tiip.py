@@ -14,8 +14,7 @@ class TIIPMessage(object):
     def __init__(
             self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
             source=None, target=None, subTarget=None, signal=None, channel=None, arguments=None, payload=None, ok=None,
-            tenant=None, verifyVersion=False):
-        # TODO: verifyVersion should be default True before release.
+            tenant=None, verifyVersion=True):
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
