@@ -3,6 +3,14 @@ import unittest
 
 from pytiip.tiip import TIIPMessage
 from pytiip import tiip
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    long = int
+    unicode = str
+    basestring = str
+else:
+    bytes = str
 
 
 class TestTIIPMessage(unittest.TestCase):
@@ -29,6 +37,7 @@ class TestTIIPMessage(unittest.TestCase):
 
         # Dictionary representation example
         self.tiipDict = {
+            'protocol': self.tiipVersion,
             'timestamp': self.timestamp,
             'clientTime': self.clientTime,
             'mid': self.mid,
