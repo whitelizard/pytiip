@@ -5,6 +5,14 @@ Python implementation of the TIIP (Thin Industrial Internet Protocol) protocol.
 import json
 import time
 
+# Python3 compability fixes
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    long = int
+    unicode = str
+else:
+    bytes = str
 
 __version__ = 'tiip.1.0'  # TIIP protocol version
 
@@ -124,10 +132,10 @@ class TIIPMessage(object):
 
     @timestamp.setter
     def timestamp(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
-            except ValueError:
+            except (ValueError):
                 raise ValueError('timestamp string must be parseable to float')
             else:
                 self.__timestamp = value
@@ -144,10 +152,10 @@ class TIIPMessage(object):
     def clientTime(self, value):
         if value is None:
             self.__clientTime = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
-            except ValueError:
+            except (ValueError):
                 raise ValueError('clientTime string must be parseable to float')
             else:
                 self.__clientTime = value
@@ -164,7 +172,7 @@ class TIIPMessage(object):
     def mid(self, value):
         if value is None:
             self.__mid = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__mid = value
         else:
             raise TypeError('mid can only be of types unicode, str or None')
@@ -177,7 +185,7 @@ class TIIPMessage(object):
     def sid(self, value):
         if value is None:
             self.__sid = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__sid = value
         else:
             raise TypeError('sid can only be of types unicode, str or None')
@@ -190,7 +198,7 @@ class TIIPMessage(object):
     def type(self, value):
         if value is None:
             self.__type = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__type = value
         else:
             raise TypeError('type can only be of types unicode, str or None')
@@ -216,7 +224,7 @@ class TIIPMessage(object):
     def target(self, value):
         if value is None:
             self.__target = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__target = value
         else:
             raise TypeError('target can only be of types unicode, str or None')
@@ -229,7 +237,7 @@ class TIIPMessage(object):
     def subTarget(self, value):
         if value is None:
             self.__subTarget = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__subTarget = value
         else:
             raise TypeError('subTarget can only be of types unicode, str or None')
@@ -242,7 +250,7 @@ class TIIPMessage(object):
     def signal(self, value):
         if value is None:
             self.__signal = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__signal = value
         else:
             raise TypeError('signal can only be of types unicode, str or None')
@@ -255,7 +263,7 @@ class TIIPMessage(object):
     def channel(self, value):
         if value is None:
             self.__channel = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__channel = value
         else:
             raise TypeError('channel can only be of types unicode, str or None')
@@ -307,7 +315,7 @@ class TIIPMessage(object):
     def tenant(self, value):
         if value is None:
             self.__tenant = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__tenant = value
         else:
             raise TypeError('tenant can only be of types unicode, str or None')
