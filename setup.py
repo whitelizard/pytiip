@@ -31,7 +31,7 @@ setup(
     name='pytiip',
     version=version,
     description='TIIP-protocol implementation for Python',
-    author='Esbjorn Blomquist, Jesper Ahlberg',
+    author='Esbjorn Blomquist, Jesper Ahlberg, Mikael Magnusson',
     license='LICENSE',
     packages=[
         'pytiip'
