@@ -14,7 +14,7 @@ if PY3:
 else:
     bytes = str
 
-__version__ = 'tiip.1.0'  # TIIP protocol version
+__version__ = 'tiip.2.0'  # TIIP protocol version
 
 
 class TIIPMessage(object):
