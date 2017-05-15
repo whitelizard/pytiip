@@ -10,6 +10,7 @@ if PY3:
     unicode = str
     basestring = str
 else:
+    # noinspection PyShadowingBuiltins
     bytes = str
 
 

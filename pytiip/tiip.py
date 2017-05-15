@@ -12,6 +12,7 @@ if PY3:
     long = int
     unicode = str
 else:
+    # noinspection PyShadowingBuiltins
     bytes = str
 
 __version__ = 'tiip.2.0'  # TIIP protocol version
@@ -130,7 +131,7 @@ class TIIPMessage(object):
         if isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
-            except (ValueError):
+            except ValueError:
                 raise ValueError('timestamp string must be parseable to float')
             else:
                 self.__ts = value
@@ -150,7 +151,7 @@ class TIIPMessage(object):
         elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
-            except (ValueError):
+            except ValueError:
                 raise ValueError('clientTime string must be parseable to float')
             else:
                 self.__ct = value
