@@ -3,6 +3,15 @@ import unittest
 
 from pytiip.tiip import TIIPMessage
 from pytiip import tiip
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    long = int
+    unicode = str
+    basestring = str
+else:
+    # noinspection PyShadowingBuiltins
+    bytes = str
 
 
 class TestTIIPMessage(unittest.TestCase):
@@ -18,8 +27,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.sid = u'testSid'
         self.type = u'testType'
         self.source = [u'testSource1', u'testSource2']
-        self.target = u'testTarget'
-        self.subTarget = u'testSubTarget'
+        self.target = [u'testTarget1', u'testTarget2']
         self.signal = u'testSignal'
         self.channel = u'testChannel'
         self.arguments = {u'testArgument1': u'testArgumentValue1', u'testArgument2': u'testArgumentValue2'}
@@ -29,20 +37,20 @@ class TestTIIPMessage(unittest.TestCase):
 
         # Dictionary representation example
         self.tiipDict = {
-            'timestamp': self.timestamp,
-            'clientTime': self.clientTime,
+            'pv': self.tiipVersion,
+            'ts': self.timestamp,
+            'ct': self.clientTime,
             'mid': self.mid,
             'sid': self.sid,
             'type': self.type,
-            'source': self.source,
-            'target': self.target,
-            'subTarget': self.subTarget,
-            'signal': self.signal,
-            'channel': self.channel,
-            'arguments': self.arguments,
-            'payload': self.payload,
+            'src': self.source,
+            'targ': self.target,
+            'sig': self.signal,
+            'ch': self.channel,
+            'arg': self.arguments,
+            'pl': self.payload,
             'ok': self.ok,
-            'tenant': self.tenant
+            'ten': self.tenant
         }
 
         # String representation example
@@ -56,25 +64,24 @@ class TestTIIPMessage(unittest.TestCase):
 
     def generateExampleTIIPMessage(self):
         return TIIPMessage(
-            timestamp=self.timestamp, clientTime=self.clientTime, mid=self.mid, sid=self.sid, type=self.type,
-            source=self.source, target=self.target, subTarget=self.subTarget, signal=self.signal, channel=self.channel,
-            arguments=self.arguments, payload=self.payload, ok=self.ok, tenant=self.tenant)
+            ts=self.timestamp, ct=self.clientTime, mid=self.mid, sid=self.sid, type=self.type,
+            src=self.source, targ=self.target, sig=self.signal, ch=self.channel,
+            arg=self.arguments, pl=self.payload, ok=self.ok, ten=self.tenant)
 
     def verifyKeys(self, tiipMsg):
-        self.assertEquals(tiipMsg.timestamp, self.timestamp)
-        self.assertEquals(tiipMsg.clientTime, self.clientTime)
+        self.assertEquals(tiipMsg.ts, self.timestamp)
+        self.assertEquals(tiipMsg.ct, self.clientTime)
         self.assertEquals(tiipMsg.mid, self.mid)
         self.assertEquals(tiipMsg.sid, self.sid)
         self.assertEquals(tiipMsg.type, self.type)
-        self.assertEquals(tiipMsg.source, self.source)
-        self.assertEquals(tiipMsg.target, self.target)
-        self.assertEquals(tiipMsg.subTarget, self.subTarget)
-        self.assertEquals(tiipMsg.signal, self.signal)
-        self.assertEquals(tiipMsg.channel, self.channel)
-        self.assertEquals(tiipMsg.arguments, self.arguments)
-        self.assertEquals(tiipMsg.payload, self.payload)
+        self.assertEquals(tiipMsg.src, self.source)
+        self.assertEquals(tiipMsg.targ, self.target)
+        self.assertEquals(tiipMsg.sig, self.signal)
+        self.assertEquals(tiipMsg.ch, self.channel)
+        self.assertEquals(tiipMsg.arg, self.arguments)
+        self.assertEquals(tiipMsg.pl, self.payload)
         self.assertEquals(tiipMsg.ok, self.ok)
-        self.assertEquals(tiipMsg.tenant, self.tenant)
+        self.assertEquals(tiipMsg.ten, self.tenant)
 
     def test000_initFromKeys(self):
         tiipMsg = self.generateExampleTIIPMessage()
@@ -93,21 +100,21 @@ class TestTIIPMessage(unittest.TestCase):
         Test that protocol key is automatically generated to be the version of the protocol
         """
         tiipMsgEmpty = TIIPMessage()
-        self.assertEquals(tiipMsgEmpty.protocol, self.tiipVersion)
+        self.assertEquals(tiipMsgEmpty.pv, self.tiipVersion)
         tiipMsgFromKeys = self.generateExampleTIIPMessage()
-        self.assertEquals(tiipMsgFromKeys.protocol, self.tiipVersion)
+        self.assertEquals(tiipMsgFromKeys.pv, self.tiipVersion)
         tiipMsgFromDict = TIIPMessage(tiipDict=self.tiipDict)
-        self.assertEquals(tiipMsgFromDict.protocol, self.tiipVersion)
+        self.assertEquals(tiipMsgFromDict.pv, self.tiipVersion)
         tiipMsgFromStr = TIIPMessage(tiipStr=self.tiipStr)
-        self.assertEquals(tiipMsgFromStr.protocol, self.tiipVersion)
+        self.assertEquals(tiipMsgFromStr.pv, self.tiipVersion)
 
     def test004_verifyTimestamp(self):
         """
         Test that a timestamp is automatically generated if not specified.
         """
         tiipMsg = TIIPMessage()
-        self.assertIsInstance(tiipMsg.timestamp, basestring)
-        float(tiipMsg.timestamp)  # Make sure the timestamp is a str representation of a float
+        self.assertIsInstance(tiipMsg.ts, basestring)
+        float(tiipMsg.ts)  # Make sure the timestamp is a str representation of a float
 
     def test005_setProtocol(self):
         tiipMessage = TIIPMessage()
@@ -120,46 +127,46 @@ class TestTIIPMessage(unittest.TestCase):
         tiipMessage = TIIPMessage()
 
         # Correct (str, unicode, float, int, long)
-        tiipMessage.timestamp = str(self.timestamp)
-        self.assertEquals(tiipMessage.timestamp, self.timestamp)
-        tiipMessage.timestamp = self.timestamp
-        self.assertEquals(tiipMessage.timestamp, self.timestamp)
-        tiipMessage.timestamp = float(self.timestamp)
-        self.assertEquals(tiipMessage.timestamp, self.timestamp)
-        tiipMessage.timestamp = int(float(self.timestamp))
-        self.assertEquals(tiipMessage.timestamp, repr(round(int(float(self.timestamp)), 3)))
-        tiipMessage.timestamp = long(float(self.timestamp))
-        self.assertEquals(tiipMessage.timestamp, repr(round(long(float(self.timestamp)), 3)))
+        tiipMessage.ts = str(self.timestamp)
+        self.assertEquals(tiipMessage.ts, self.timestamp)
+        tiipMessage.ts = self.timestamp
+        self.assertEquals(tiipMessage.ts, self.timestamp)
+        tiipMessage.ts = float(self.timestamp)
+        self.assertEquals(tiipMessage.ts, self.timestamp)
+        tiipMessage.ts = int(float(self.timestamp))
+        self.assertEquals(tiipMessage.ts, repr(round(int(float(self.timestamp)), 3)))
+        tiipMessage.ts = long(float(self.timestamp))
+        self.assertEquals(tiipMessage.ts, repr(round(long(float(self.timestamp)), 3)))
 
         # Incorrect
         tiipMessage = TIIPMessage()
         with self.assertRaises(TypeError):
-            tiipMessage.timestamp = None
+            tiipMessage.ts = None
         with self.assertRaises(ValueError):
-            tiipMessage.timestamp = 'incorrectTimestampString'
+            tiipMessage.ts = 'incorrectTimestampString'
 
     def test007_setClientTime(self):
         # Correct (str, unicode, float, int, long, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.clientTime = str(self.clientTime)
-        self.assertEquals(tiipMessage.clientTime, self.clientTime)
-        tiipMessage.clientTime = self.clientTime
-        self.assertEquals(tiipMessage.clientTime, self.clientTime)
-        tiipMessage.clientTime = float(self.clientTime)
-        self.assertEquals(tiipMessage.clientTime, self.clientTime)
-        tiipMessage.clientTime = int(float(self.clientTime))
-        self.assertEquals(tiipMessage.clientTime, repr(round(int(float(self.clientTime)), 3)))
-        tiipMessage.clientTime = long(float(self.clientTime))
-        self.assertEquals(tiipMessage.clientTime, repr(round(long(float(self.clientTime)), 3)))
-        tiipMessage.clientTime = None
-        self.assertEquals(tiipMessage.clientTime, None)
+        tiipMessage.ct = str(self.clientTime)
+        self.assertEquals(tiipMessage.ct, self.clientTime)
+        tiipMessage.ct = self.clientTime
+        self.assertEquals(tiipMessage.ct, self.clientTime)
+        tiipMessage.ct = float(self.clientTime)
+        self.assertEquals(tiipMessage.ct, self.clientTime)
+        tiipMessage.ct = int(float(self.clientTime))
+        self.assertEquals(tiipMessage.ct, repr(round(int(float(self.clientTime)), 3)))
+        tiipMessage.ct = long(float(self.clientTime))
+        self.assertEquals(tiipMessage.ct, repr(round(long(float(self.clientTime)), 3)))
+        tiipMessage.ct = None
+        self.assertEquals(tiipMessage.ct, None)
 
         # Incorrect
         tiipMessage = TIIPMessage()
         with self.assertRaises(ValueError):
-            tiipMessage.clientTime = 'incorrectClientTimeStampString'
+            tiipMessage.ct = 'incorrectClientTimeStampString'
         with self.assertRaises(TypeError):
-            tiipMessage.timestamp = dict()
+            tiipMessage.ts = dict()
 
     def test008_setMid(self):
         # Correct (str, unicode, None)
@@ -202,80 +209,64 @@ class TestTIIPMessage(unittest.TestCase):
     def test011_setSource(self):
         # Correct (list, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.source = self.source
-        self.assertEquals(tiipMessage.source, self.source)
-        tiipMessage.source = None
-        self.assertEquals(tiipMessage.source, None)
+        tiipMessage.src = self.source
+        self.assertEquals(tiipMessage.src, self.source)
+        tiipMessage.src = None
+        self.assertEquals(tiipMessage.src, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.source = 1
+            tiipMessage.src = 1
 
     def test012_setTarget(self):
         # Correct (str, unicode, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.target = str(self.target)
-        self.assertEquals(tiipMessage.target, self.target)
-        tiipMessage.target = self.target
-        self.assertEquals(tiipMessage.target, self.target)
-        tiipMessage.target = None
-        self.assertEquals(tiipMessage.target, None)
+        tiipMessage.targ = self.target
+        self.assertEquals(tiipMessage.targ, self.target)
+        tiipMessage.targ = None
+        self.assertEquals(tiipMessage.targ, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.target = 1
-
-    def test013_setSubTarget(self):
-        # Correct (str, unicode, None)
-        tiipMessage = TIIPMessage()
-        tiipMessage.subTarget = str(self.subTarget)
-        self.assertEquals(tiipMessage.subTarget, self.subTarget)
-        tiipMessage.subTarget = self.subTarget
-        self.assertEquals(tiipMessage.subTarget, self.subTarget)
-        tiipMessage.subTarget = None
-        self.assertEquals(tiipMessage.subTarget, None)
-
-        # Incorrect
-        with self.assertRaises(TypeError):
-            tiipMessage.subTarget = 1
+            tiipMessage.targ = 1
 
     def test014_setSignal(self):
         # Correct (str, unicode, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.signal = str(self.signal)
-        self.assertEquals(tiipMessage.signal, self.signal)
-        tiipMessage.signal = self.signal
-        self.assertEquals(tiipMessage.signal, self.signal)
-        tiipMessage.signal = None
-        self.assertEquals(tiipMessage.signal, None)
+        tiipMessage.sig = str(self.signal)
+        self.assertEquals(tiipMessage.sig, self.signal)
+        tiipMessage.sig = self.signal
+        self.assertEquals(tiipMessage.sig, self.signal)
+        tiipMessage.sig = None
+        self.assertEquals(tiipMessage.sig, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.signal = 1
+            tiipMessage.sig = 1
 
     def test015_setArguments(self):
         # Correct (dict, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.arguments = self.arguments
-        self.assertEquals(tiipMessage.arguments, self.arguments)
-        tiipMessage.arguments = None
-        self.assertEquals(tiipMessage.arguments, None)
+        tiipMessage.arg = self.arguments
+        self.assertEquals(tiipMessage.arg, self.arguments)
+        tiipMessage.arg = None
+        self.assertEquals(tiipMessage.arg, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.arguments = 1
+            tiipMessage.arg = 1
 
     def test016_setPayload(self):
         # Correct (list, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.payload = self.payload
-        self.assertEquals(tiipMessage.payload, self.payload)
-        tiipMessage.payload = None
-        self.assertEquals(tiipMessage.payload, None)
+        tiipMessage.pl = self.payload
+        self.assertEquals(tiipMessage.pl, self.payload)
+        tiipMessage.pl = None
+        self.assertEquals(tiipMessage.pl, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.payload = 1
+            tiipMessage.pl = 1
 
     def test017_setOk(self):
         # Correct (bool, None)
@@ -292,16 +283,16 @@ class TestTIIPMessage(unittest.TestCase):
     def test018_setTenant(self):
         # Correct (str, unicode, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.tenant = str(self.tenant)
-        self.assertEquals(tiipMessage.tenant, self.tenant)
-        tiipMessage.tenant = self.tenant
-        self.assertEquals(tiipMessage.tenant, self.tenant)
-        tiipMessage.tenant = None
-        self.assertEquals(tiipMessage.tenant, None)
+        tiipMessage.ten = str(self.tenant)
+        self.assertEquals(tiipMessage.ten, self.tenant)
+        tiipMessage.ten = self.tenant
+        self.assertEquals(tiipMessage.ten, self.tenant)
+        tiipMessage.ten = None
+        self.assertEquals(tiipMessage.ten, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.tenant = 1
+            tiipMessage.ten = 1
 
     def test019_strCast(self):
         tiipMessage = self.generateExampleTIIPMessage()
@@ -314,16 +305,16 @@ class TestTIIPMessage(unittest.TestCase):
     def test021_setChannel(self):
         # Correct (str, unicode, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.channel = str(self.channel)
-        self.assertEquals(tiipMessage.channel, self.channel)
-        tiipMessage.channel = self.channel
-        self.assertEquals(tiipMessage.channel, self.channel)
-        tiipMessage.channel = None
-        self.assertEquals(tiipMessage.channel, None)
+        tiipMessage.ch = str(self.channel)
+        self.assertEquals(tiipMessage.ch, self.channel)
+        tiipMessage.ch = self.channel
+        self.assertEquals(tiipMessage.ch, self.channel)
+        tiipMessage.ch = None
+        self.assertEquals(tiipMessage.ch, None)
 
         # Incorrect
         with self.assertRaises(TypeError):
-            tiipMessage.signal = 1
+            tiipMessage.sig = 1
 
 if __name__ == "__main__":
     unittest.main()

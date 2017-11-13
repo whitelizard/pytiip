@@ -5,16 +5,25 @@ Python implementation of the TIIP (Thin Industrial Internet Protocol) protocol.
 import json
 import time
 
+# Python3 compability fixes
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    long = int
+    unicode = str
+else:
+    # noinspection PyShadowingBuiltins
+    bytes = str
 
-__version__ = 'tiip.1.0'  # TIIP protocol version
+__version__ = 'tiip.2.0'  # TIIP protocol version
 
 
 class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
     def __init__(
-            self, tiipStr=None, tiipDict=None, timestamp=None, clientTime=None, mid=None, sid=None, type=None,
-            source=None, target=None, subTarget=None, signal=None, channel=None, arguments=None, payload=None, ok=None,
-            tenant=None, verifyVersion=True):
+            self, tiipStr=None, tiipDict=None, ts=None, ct=None, mid=None, sid=None, type=None,
+            src=None, targ=None, sig=None, ch=None, arg=None, pl=None, ok=None,
+            ten=None, verifyVersion=True):
         """
         @param tiipStr: A string representation of a TIIPMessage to load on init
         @param tiipDict: A dictionary representation of a TIIPMessage to load on init
@@ -23,88 +32,83 @@ class TIIPMessage(object):
             https://github.com/whitelizard/tiip
         """
         # Protocol keys
-        self.__protocol = __version__
-        self.__timestamp = self.__getTimeStamp()
-        self.__clientTime = None
+        self.__pv = __version__
+        self.__ts = self.__getTimeStamp()
+        self.__ct = None
         self.__mid = None
         self.__sid = None
         self.__type = None
-        self.__source = None
-        self.__target = None
-        self.__subTarget = None
-        self.__signal = None
-        self.__channel = None
-        self.__arguments = None
-        self.__payload = None
+        self.__src = None
+        self.__targ = None
+        self.__sig = None
+        self.__ch = None
+        self.__arg = None
+        self.__pl = None
         self.__ok = None
-        self.__tenant = None
+        self.__ten = None
 
         # Parse constructor arguments
         if tiipStr is not None:
             self.loadFromStr(tiipStr, verifyVersion)
         if tiipDict is not None:
             self.loadFromDict(tiipDict, verifyVersion)
-        if timestamp is not None:
-            self.timestamp = timestamp
-        if clientTime is not None:
-            self.clientTime = clientTime
+        if ts is not None:
+            self.ts = ts
+        if ct is not None:
+            self.ct = ct
         if mid is not None:
             self.mid = mid
         if sid is not None:
             self.sid = sid
         if type is not None:
             self.type = type
-        if source is not None:
-            self.source = source
-        if target is not None:
-            self.target = target
-        if subTarget is not None:
-            self.subTarget = subTarget
-        if signal is not None:
-            self.signal = signal
-        if channel is not None:
-            self.channel = channel
-        if arguments is not None:
-            self.arguments = arguments
-        if payload is not None:
-            self.payload = payload
+        if src is not None:
+            self.src = src
+        if targ is not None:
+            self.targ = targ
+        if sig is not None:
+            self.sig = sig
+        if ch is not None:
+            self.ch = ch
+        if arg is not None:
+            self.arg = arg
+        if pl is not None:
+            self.pl = pl
         if ok is not None:
             self.ok = ok
-        if tenant is not None:
-            self.tenant = tenant
+        if ten is not None:
+            self.ten = ten
 
     def __str__(self):
         return json.dumps(dict(self))
 
     def __iter__(self):
-        yield 'protocol', self.__protocol
-        yield 'timestamp', self.__timestamp
-        if self.__clientTime is not None:
-            yield 'clientTime', self.__clientTime
+        yield 'pv', self.__pv
+        yield 'ts', self.__ts
+        if self.__ct is not None:
+            yield 'ct', self.__ct
         if self.__mid is not None:
             yield 'mid', self.__mid
         if self.__sid is not None:
             yield 'sid', self.__sid
         if self.__type is not None:
             yield 'type', self.__type
-        if self.__source is not None:
-            yield 'source', self.__source
-        if self.__target is not None:
-            yield 'target', self.__target
-        if self.__subTarget is not None:
-            yield 'subTarget', self.__subTarget
-        if self.__signal is not None:
-            yield 'signal', self.__signal
-        if self.__channel is not None:
-            yield 'channel', self.__channel
-        if self.__arguments is not None:
-            yield 'arguments', self.__arguments
-        if self.__payload is not None:
-            yield 'payload', self.__payload
+        if self.__src is not None:
+            yield 'src', self.__src
+        if self.__targ is not None:
+            yield 'targ', self.__targ
+        if self.__sig is not None:
+            yield 'sig', self.__sig
+        if self.__ch is not None:
+            yield 'ch', self.__ch
+        if self.__arg is not None:
+            yield 'arg', self.__arg
+        if self.__pl is not None:
+            yield 'pl', self.__pl
         if self.__ok is not None:
             yield 'ok', self.__ok
-        if self.__tenant is not None:
-            yield 'tenant', self.__tenant
+        if self.__ten is not None:
+            yield 'ten', self.__ten
 
     @staticmethod
     def __getTimeStamp():
@@ -115,44 +119,44 @@ class TIIPMessage(object):
         return repr(round(time.time(), 3))
 
     @property
-    def protocol(self):
-        return self.__protocol
+    def pv(self):
+        return self.__pv
 
     @property
-    def timestamp(self):
-        return self.__timestamp
+    def ts(self):
+        return self.__ts
 
-    @timestamp.setter
-    def timestamp(self, value):
-        if isinstance(value, basestring):
+    @ts.setter
+    def ts(self, value):
+        if isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
                 raise ValueError('timestamp string must be parseable to float')
             else:
-                self.__timestamp = value
+                self.__ts = value
         elif isinstance(value, (int, float, long)):
-            self.__timestamp = repr(round(value, 3))
+            self.__ts = repr(round(value, 3))
         else:
             raise TypeError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
 
     @property
-    def clientTime(self):
-        return self.__clientTime
+    def ct(self):
+        return self.__ct
 
-    @clientTime.setter
-    def clientTime(self, value):
+    @ct.setter
+    def ct(self, value):
         if value is None:
-            self.__clientTime = None
-        elif isinstance(value, basestring):
+            self.__ct = None
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
                 raise ValueError('clientTime string must be parseable to float')
             else:
-                self.__clientTime = value
+                self.__ct = value
         elif isinstance(value, (int, float, long)):
-            self.__clientTime = repr(round(value, 3))
+            self.__ct = repr(round(value, 3))
         else:
             raise TypeError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
 
@@ -164,7 +168,7 @@ class TIIPMessage(object):
     def mid(self, value):
         if value is None:
             self.__mid = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__mid = value
         else:
             raise TypeError('mid can only be of types unicode, str or None')
@@ -177,7 +181,7 @@ class TIIPMessage(object):
     def sid(self, value):
         if value is None:
             self.__sid = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__sid = value
         else:
             raise TypeError('sid can only be of types unicode, str or None')
@@ -190,99 +194,86 @@ class TIIPMessage(object):
     def type(self, value):
         if value is None:
             self.__type = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             self.__type = value
         else:
             raise TypeError('type can only be of types unicode, str or None')
 
     @property
-    def source(self):
-        return self.__source
+    def src(self):
+        return self.__src
 
-    @source.setter
-    def source(self, value):
+    @src.setter
+    def src(self, value):
         if value is None:
-            self.__source = None
+            self.__src = None
         elif isinstance(value, list):
-            self.__source = value
+            self.__src = value
         else:
             raise TypeError('source can only be of types list or None')
 
     @property
-    def target(self):
-        return self.__target
+    def targ(self):
+        return self.__targ
 
-    @target.setter
-    def target(self, value):
+    @targ.setter
+    def targ(self, value):
         if value is None:
-            self.__target = None
-        elif isinstance(value, basestring):
-            self.__target = value
+            self.__targ = None
+        elif isinstance(value, list):
+            self.__targ = value
         else:
-            raise TypeError('target can only be of types unicode, str or None')
+            raise TypeError('target can only be of types list or None')
 
     @property
-    def subTarget(self):
-        return self.__subTarget
+    def sig(self):
+        return self.__sig
 
-    @subTarget.setter
-    def subTarget(self, value):
+    @sig.setter
+    def sig(self, value):
         if value is None:
-            self.__subTarget = None
-        elif isinstance(value, basestring):
-            self.__subTarget = value
-        else:
-            raise TypeError('subTarget can only be of types unicode, str or None')
-
-    @property
-    def signal(self):
-        return self.__signal
-
-    @signal.setter
-    def signal(self, value):
-        if value is None:
-            self.__signal = None
-        elif isinstance(value, basestring):
-            self.__signal = value
+            self.__sig = None
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
+            self.__sig = value
         else:
             raise TypeError('signal can only be of types unicode, str or None')
 
     @property
-    def channel(self):
-        return self.__channel
+    def ch(self):
+        return self.__ch
 
-    @channel.setter
-    def channel(self, value):
+    @ch.setter
+    def ch(self, value):
         if value is None:
-            self.__channel = None
-        elif isinstance(value, basestring):
-            self.__channel = value
+            self.__ch = None
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
+            self.__ch = value
         else:
             raise TypeError('channel can only be of types unicode, str or None')
 
     @property
-    def arguments(self):
-        return self.__arguments
+    def arg(self):
+        return self.__arg
 
-    @arguments.setter
-    def arguments(self, value):
+    @arg.setter
+    def arg(self, value):
         if value is None:
-            self.__arguments = None
+            self.__arg = None
         elif isinstance(value, dict):
-            self.__arguments = value
+            self.__arg = value
         else:
             raise TypeError('arguments can only be of types dict or None')
 
     @property
-    def payload(self):
-        return self.__payload
+    def pl(self):
+        return self.__pl
 
-    @payload.setter
-    def payload(self, value):
+    @pl.setter
+    def pl(self, value):
         if value is None:
-            self.__payload = None
+            self.__pl = None
         elif isinstance(value, list):
-            self.__payload = value
+            self.__pl = value
         else:
             raise TypeError('payload can only be of types list or None')
 
@@ -300,15 +291,15 @@ class TIIPMessage(object):
             raise TypeError('ok can only be of types bool or None')
 
     @property
-    def tenant(self):
-        return self.__tenant
+    def ten(self):
+        return self.__ten
 
-    @tenant.setter
-    def tenant(self, value):
+    @ten.setter
+    def ten(self, value):
         if value is None:
-            self.__tenant = None
-        elif isinstance(value, basestring):
-            self.__tenant = value
+            self.__ten = None
+        elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
+            self.__ten = value
         else:
             raise TypeError('tenant can only be of types unicode, str or None')
 
@@ -332,34 +323,32 @@ class TIIPMessage(object):
         @return: None
         """
         if verifyVersion:
-            if 'protocol' not in tiipDict or tiipDict['protocol'] != self.__protocol:
+            if 'pv' not in tiipDict or tiipDict['pv'] != self.__pv:
                 raise ValueError(
-                    'Incorrect tiip version "' + str(tiipDict['protocol']) + '" expected "' + self.__protocol + '"')
-        if 'timestamp' in tiipDict:
-            self.timestamp = tiipDict['timestamp']
-        if 'clientTime' in tiipDict:
-            self.clientTime = tiipDict['clientTime']
+                    'Incorrect tiip version "' + str(tiipDict['pv']) + '" expected "' + self.__pv + '"')
+        if 'ts' in tiipDict:
+            self.ts = tiipDict['ts']
+        if 'ct' in tiipDict:
+            self.ct = tiipDict['ct']
         if 'mid' in tiipDict:
             self.mid = tiipDict['mid']
         if 'sid' in tiipDict:
             self.sid = tiipDict['sid']
         if 'type' in tiipDict:
             self.type = tiipDict['type']
-        if 'source' in tiipDict:
-            self.source = tiipDict['source']
-        if 'target' in tiipDict:
-            self.target = tiipDict['target']
-        if 'subTarget' in tiipDict:
-            self.subTarget = tiipDict['subTarget']
-        if 'signal' in tiipDict:
-            self.signal = tiipDict['signal']
-        if 'channel' in tiipDict:
-            self.channel = tiipDict['channel']
-        if 'arguments' in tiipDict:
-            self.arguments = tiipDict['arguments']
-        if 'payload' in tiipDict:
-            self.payload = tiipDict['payload']
+        if 'src' in tiipDict:
+            self.src = tiipDict['src']
+        if 'targ' in tiipDict:
+            self.targ = tiipDict['targ']
+        if 'sig' in tiipDict:
+            self.sig = tiipDict['sig']
+        if 'ch' in tiipDict:
+            self.ch = tiipDict['ch']
+        if 'arg' in tiipDict:
+            self.arg = tiipDict['arg']
+        if 'pl' in tiipDict:
+            self.pl = tiipDict['pl']
         if 'ok' in tiipDict:
             self.ok = tiipDict['ok']
-        if 'tenant' in tiipDict:
-            self.tenant = tiipDict['tenant']
+        if 'ten' in tiipDict:
+            self.ten = tiipDict['ten']
