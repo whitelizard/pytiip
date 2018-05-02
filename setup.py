@@ -3,7 +3,7 @@
 """"
 The MIT License (MIT)
 
-Copyright (c) 2016 Esbjorn Blomquist
+Copyright (c) 2016 Esbjorn Blomquist, Jesper Ahlberg, Mikael Magnusson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,23 @@ setup(
     version=version,
     description='TIIP-protocol implementation for Python',
     author='Esbjorn Blomquist, Jesper Ahlberg, Mikael Magnusson',
-    license='LICENSE',
+    license='MIT License',
+    url="https://github.com/MickMack1983/pytiip.git",
+    author_email="mikael.m.magnusson@gmail.com",
     packages=[
         'pytiip'
-    ]
+    ],
+    classifiers=(
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
+    )
 )
