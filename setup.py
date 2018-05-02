@@ -24,13 +24,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from distutils.core import setup
+from setuptools import setup
 from pytiip.tiip import __version__ as version
 
 setup(
     name='pytiip',
     version=version,
     description='TIIP-protocol implementation for Python',
+    keywords='Industrial Internet Things Protocol',
     author='Esbjorn Blomquist, Jesper Ahlberg, Mikael Magnusson',
     license='MIT License',
     url="https://github.com/MickMack1983/pytiip.git",
