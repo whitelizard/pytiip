@@ -27,9 +27,13 @@ SOFTWARE.
 from setuptools import setup
 from pytiip.tiip import __version__ as version
 
+fixed_version=version[5:]
+if len(fixed_version.split(".")) <3:
+    fixed_version += ".0"
+
 setup(
     name='pytiip',
-    version=version,
+    version=fixed_version,
     description='TIIP-protocol implementation for Python',
     keywords='Industrial Internet Things Protocol',
     author='Esbjorn Blomquist, Jesper Ahlberg, Mikael Magnusson',
