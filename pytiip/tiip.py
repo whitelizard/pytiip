@@ -116,7 +116,7 @@ class TIIPMessage(object):
         Creates a timestamp string representation according to the TIIP-specification for timestamps.
         @return:
         """
-        return repr(round(time.time(), 3))
+        return repr(round(time.time(), 6))
 
     @property
     def pv(self):
