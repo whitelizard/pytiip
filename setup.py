@@ -29,7 +29,7 @@ from pytiip.tiip import __version__ as version
 
 fixed_version=version[5:]
 if len(fixed_version.split(".")) <3:
-    fixed_version += ".1"
+    fixed_version += ".0"
 
 setup(
     name='pytiip',
@@ -54,6 +54,8 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
+
     ]
 )

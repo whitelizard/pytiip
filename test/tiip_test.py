@@ -1,9 +1,11 @@
 import json
 import unittest
+import dateutil.parser as parser
 
 from pytiip.tiip import TIIPMessage
 from pytiip import tiip
 import sys
+
 PY3 = sys.version_info > (3,)
 if PY3:
     long = int
@@ -21,8 +23,8 @@ class TestTIIPMessage(unittest.TestCase):
         self.tiipVersion = tiip.__version__
 
         # Key examples
-        self.timestamp = u'123456789.123'
-        self.clientTime = u'987654321.987'
+        self.timestamp = u'2000-01-01T01:23:45.678901+02:00'
+        self.latency = u'987654321.987'
         self.mid = u'testMid'
         self.sid = u'testSid'
         self.type = u'testType'
@@ -39,7 +41,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.tiipDict = {
             'pv': self.tiipVersion,
             'ts': self.timestamp,
-            'ct': self.clientTime,
+            'lat': self.latency,
             'mid': self.mid,
             'sid': self.sid,
             'type': self.type,
@@ -64,13 +66,13 @@ class TestTIIPMessage(unittest.TestCase):
 
     def generateExampleTIIPMessage(self):
         return TIIPMessage(
-            ts=self.timestamp, ct=self.clientTime, mid=self.mid, sid=self.sid, type=self.type,
+            ts=self.timestamp, lat=self.latency, mid=self.mid, sid=self.sid, type=self.type,
             src=self.source, targ=self.target, sig=self.signal, ch=self.channel,
             arg=self.arguments, pl=self.payload, ok=self.ok, ten=self.tenant)
 
     def verifyKeys(self, tiipMsg):
         self.assertEqual(tiipMsg.ts, self.timestamp)
-        self.assertEqual(tiipMsg.ct, self.clientTime)
+        self.assertEqual(tiipMsg.lat, self.latency)
         self.assertEqual(tiipMsg.mid, self.mid)
         self.assertEqual(tiipMsg.sid, self.sid)
         self.assertEqual(tiipMsg.type, self.type)
@@ -114,7 +116,7 @@ class TestTIIPMessage(unittest.TestCase):
         """
         tiipMsg = TIIPMessage()
         self.assertIsInstance(tiipMsg.ts, basestring)
-        float(tiipMsg.ts)  # Make sure the timestamp is a str representation of a float
+        parser.parse(tiipMsg.ts)  # Make sure the timestamp is a str representation of a float
 
     def test005_setProtocol(self):
         tiipMessage = TIIPMessage()
@@ -131,12 +133,8 @@ class TestTIIPMessage(unittest.TestCase):
         self.assertEqual(tiipMessage.ts, self.timestamp)
         tiipMessage.ts = self.timestamp
         self.assertEqual(tiipMessage.ts, self.timestamp)
-        tiipMessage.ts = float(self.timestamp)
+        tiipMessage.ts = parser.parse(self.timestamp)
         self.assertEqual(tiipMessage.ts, self.timestamp)
-        tiipMessage.ts = int(float(self.timestamp))
-        self.assertEqual(tiipMessage.ts, repr(round(int(float(self.timestamp)), 3)))
-        tiipMessage.ts = long(float(self.timestamp))
-        self.assertEqual(tiipMessage.ts, repr(round(long(float(self.timestamp)), 3)))
 
         # Incorrect
         tiipMessage = TIIPMessage()
@@ -145,26 +143,26 @@ class TestTIIPMessage(unittest.TestCase):
         with self.assertRaises(ValueError):
             tiipMessage.ts = 'incorrectTimestampString'
 
-    def test007_setClientTime(self):
+    def test007_setLatency(self):
         # Correct (str, unicode, float, int, long, None)
         tiipMessage = TIIPMessage()
-        tiipMessage.ct = str(self.clientTime)
-        self.assertEqual(tiipMessage.ct, self.clientTime)
-        tiipMessage.ct = self.clientTime
-        self.assertEqual(tiipMessage.ct, self.clientTime)
-        tiipMessage.ct = float(self.clientTime)
-        self.assertEqual(tiipMessage.ct, self.clientTime)
-        tiipMessage.ct = int(float(self.clientTime))
-        self.assertEqual(tiipMessage.ct, repr(round(int(float(self.clientTime)), 3)))
-        tiipMessage.ct = long(float(self.clientTime))
-        self.assertEqual(tiipMessage.ct, repr(round(long(float(self.clientTime)), 3)))
-        tiipMessage.ct = None
-        self.assertEqual(tiipMessage.ct, None)
+        tiipMessage.lat = str(self.latency)
+        self.assertEqual(tiipMessage.lat, self.latency)
+        tiipMessage.lat = self.latency
+        self.assertEqual(tiipMessage.lat, self.latency)
+        tiipMessage.lat = float(self.latency)
+        self.assertEqual(tiipMessage.lat, self.latency)
+        tiipMessage.lat = int(float(self.latency))
+        self.assertEqual(tiipMessage.lat, repr(round(int(float(self.latency)), 3)))
+        tiipMessage.lat = long(float(self.latency))
+        self.assertEqual(tiipMessage.lat, repr(round(long(float(self.latency)), 3)))
+        tiipMessage.lat = None
+        self.assertEqual(tiipMessage.lat, None)
 
         # Incorrect
         tiipMessage = TIIPMessage()
         with self.assertRaises(ValueError):
-            tiipMessage.ct = 'incorrectClientTimeStampString'
+            tiipMessage.lat = 'incorrectClientTimeStampString'
         with self.assertRaises(TypeError):
             tiipMessage.ts = dict()
 
@@ -315,6 +313,29 @@ class TestTIIPMessage(unittest.TestCase):
         # Incorrect
         with self.assertRaises(TypeError):
             tiipMessage.sig = 1
+
+    def test022_asVersion(self):
+        # Correct (str, unicode, None)
+        tiipMessage = TIIPMessage()
+        tiipMessage.lat = 1.0
+        asVersionString = tiipMessage.asVersion("tiip.3.0")
+        self.assertEqual(asVersionString, str(tiipMessage))
+
+        asVersionString = tiipMessage.asVersion("tiip.2.0")
+        tiip2Dict = json.loads(asVersionString)
+        self.assertIn("ct", tiip2Dict.keys())
+        self.assertIn("ts", tiip2Dict.keys())
+        self.assertIn("pv", tiip2Dict.keys())
+        self.assertEqual(tiip2Dict["pv"], "tiip.2.0")
+        self.assertAlmostEqual(float(tiip2Dict["ts"]), float(tiip2Dict["ct"]) + 1.0, 5)
+
+    def test023_fromTIIP2(self):
+        # Correct (str, unicode, None)
+        tiip2String = '{"pv": "tiip.2.0", "ts": "1556099778.77", "ct": "1556099734.255"}'
+        tiipMessage = TIIPMessage(tiip2String, verifyVersion=False)
+        self.assertAlmostEqual(float(tiipMessage.lat), 44.514999866485596, 5)
+        self.assertAlmostEqual(parser.parse(tiipMessage.ts).timestamp(), 1556099734.255, 5)
+
 
 if __name__ == "__main__":
     unittest.main()
