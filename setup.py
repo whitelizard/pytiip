@@ -29,7 +29,7 @@ from pytiip.tiip import __version__ as version
 
 fixed_version=version[5:]
 if len(fixed_version.split(".")) <3:
-    fixed_version += ".0"
+    fixed_version += ".1"
 
 setup(
     name='pytiip',
@@ -42,6 +42,9 @@ setup(
     author_email="mikael.m.magnusson@gmail.com",
     packages=[
         'pytiip'
+    ],
+    install_requires=[
+        'python-dateutil'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
