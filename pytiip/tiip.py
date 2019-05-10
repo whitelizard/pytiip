@@ -3,10 +3,17 @@ Python implementation of the TIIP (Thin Industrial Internet Protocol) protocol.
 """
 
 import json
+
+from datetime import datetime as dt
+from datetime import timezone as tz
+from datetime import timedelta as td
+
 import time
+import dateutil.parser as parser
 
 # Python3 compability fixes
 import sys
+
 PY3 = sys.version_info > (3,)
 if PY3:
     long = int
@@ -15,13 +22,13 @@ else:
     # noinspection PyShadowingBuiltins
     bytes = str
 
-__version__ = 'tiip.2.0'  # TIIP protocol version
+__version__ = 'tiip.3.0'  # TIIP protocol version
 
 
 class TIIPMessage(object):
     # noinspection PyShadowingBuiltins
     def __init__(
-            self, tiipStr=None, tiipDict=None, ts=None, ct=None, mid=None, sid=None, type=None,
+            self, tiipStr=None, tiipDict=None, ts=None, lat=None, mid=None, sid=None, type=None,
             src=None, targ=None, sig=None, ch=None, arg=None, pl=None, ok=None,
             ten=None, verifyVersion=True):
         """
@@ -34,7 +41,7 @@ class TIIPMessage(object):
         # Protocol keys
         self.__pv = __version__
         self.__ts = self.__getTimeStamp()
-        self.__ct = None
+        self.__lat = None
         self.__mid = None
         self.__sid = None
         self.__type = None
@@ -54,8 +61,8 @@ class TIIPMessage(object):
             self.loadFromDict(tiipDict, verifyVersion)
         if ts is not None:
             self.ts = ts
-        if ct is not None:
-            self.ct = ct
+        if lat is not None:
+            self.lat = lat
         if mid is not None:
             self.mid = mid
         if sid is not None:
@@ -85,8 +92,8 @@ class TIIPMessage(object):
     def __iter__(self):
         yield 'pv', self.__pv
         yield 'ts', self.__ts
-        if self.__ct is not None:
-            yield 'ct', self.__ct
+        if self.__lat is not None:
+            yield 'lat', self.__lat
         if self.__mid is not None:
             yield 'mid', self.__mid
         if self.__sid is not None:
@@ -116,7 +123,7 @@ class TIIPMessage(object):
         Creates a timestamp string representation according to the TIIP-specification for timestamps.
         @return:
         """
-        return repr(round(time.time(), 3))
+        return dt.now(tz(td(seconds=time.localtime().tm_gmtoff))).isoformat()
 
     @property
     def pv(self):
@@ -130,35 +137,35 @@ class TIIPMessage(object):
     def ts(self, value):
         if isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
-                float(value)  # Check if string is float representation
+                parser.parse(value)
             except ValueError:
-                raise ValueError('timestamp string must be parseable to float')
+                raise ValueError('timestamp string must be parseable to datetime')
             else:
                 self.__ts = value
-        elif isinstance(value, (int, float, long)):
-            self.__ts = repr(round(value, 3))
+        elif isinstance(value, dt):
+            self.__ts = value.isoformat()
         else:
-            raise TypeError('timestamp can only be of types float, int, long or a valid unicode or string representation of a float')
+            raise TypeError('timestamp can only be of types datetime or a valid unicode or string representation of a iso 6801')
 
     @property
-    def ct(self):
-        return self.__ct
+    def lat(self):
+        return self.__lat
 
-    @ct.setter
-    def ct(self, value):
+    @lat.setter
+    def lat(self, value):
         if value is None:
-            self.__ct = None
+            self.__lat = None
         elif isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
                 float(value)  # Check if string is float representation
             except ValueError:
-                raise ValueError('clientTime string must be parseable to float')
+                raise ValueError('Latency string must be parseable to float')
             else:
-                self.__ct = value
+                self.__lat = value
         elif isinstance(value, (int, float, long)):
-            self.__ct = repr(round(value, 3))
+            self.__lat = repr(round(value, 6))
         else:
-            raise TypeError('clientTime can only be of types None, float, int, long or a valid unicode or string representation of a float')
+            raise TypeError('Latency can only be of types None, float, int, long or a valid unicode or string representation of a float')
 
     @property
     def mid(self):
@@ -322,14 +329,24 @@ class TIIPMessage(object):
         @raise: TypeError, ValueError
         @return: None
         """
+
         if verifyVersion:
             if 'pv' not in tiipDict or tiipDict['pv'] != self.__pv:
-                raise ValueError(
-                    'Incorrect tiip version "' + str(tiipDict['pv']) + '" expected "' + self.__pv + '"')
+                raise ValueError('Incorrect tiip version "' + str(tiipDict['pv']) + '" expected "' + self.__pv + '"')
+
+        if 'pv' not in tiipDict or tiipDict['pv'] != self.__pv:
+            if tiipDict['pv'] == "tiip.2.0":
+                if 'ct' in tiipDict:
+                    ct = float(tiipDict['ct'])
+                    ts = float(tiipDict['ts'])
+                    tiipDict['ts'] = str(ct)
+                    tiipDict['lat'] = str(ts-ct)
+                tiipDict['ts'] = dt.fromtimestamp(float(tiipDict['ts'])).isoformat()
+
         if 'ts' in tiipDict:
             self.ts = tiipDict['ts']
-        if 'ct' in tiipDict:
-            self.ct = tiipDict['ct']
+        if 'lat' in tiipDict:
+            self.lat = tiipDict['lat']
         if 'mid' in tiipDict:
             self.mid = tiipDict['mid']
         if 'sid' in tiipDict:
@@ -352,3 +369,23 @@ class TIIPMessage(object):
             self.ok = tiipDict['ok']
         if 'ten' in tiipDict:
             self.ten = tiipDict['ten']
+
+    def asVersion(self, version):
+        if version == self.__pv:
+            return str(self)
+        elif version == "tiip.2.0":
+            tiipDict = {}
+            for key, val in self:
+                tiipDict[key] = val
+            if "lat" in tiipDict:
+                ct = parser.parse(tiipDict["ts"]).timestamp()
+                tiipDict["ct"] = str(ct)
+                tiipDict["ts"] = str(ct + float(tiipDict["lat"]))
+                tiipDict.pop("lat")
+            else:
+                tiipDict["ts"] = str(parser.parse(tiipDict["ts"]).timestamp())
+            tiipDict["pv"] = version
+            return json.dumps(tiipDict)
+        else:
+            raise ValueError('Incorrect tiip version. Can only handle versions: tiip.2.0 and tiip.3.0')
+
