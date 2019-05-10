@@ -5,10 +5,8 @@ Python implementation of the TIIP (Thin Industrial Internet Protocol) protocol.
 import json
 
 from datetime import datetime as dt
-from datetime import timezone as tz
 from datetime import timedelta as td
 
-import time
 import dateutil.parser as parser
 
 # Python3 compability fixes
@@ -40,7 +38,7 @@ class TIIPMessage(object):
         """
         # Protocol keys
         self.__pv = __version__
-        self.__ts = self.__getTimeStamp()
+        self.__ts = self.getTimeStamp()
         self.__lat = None
         self.__mid = None
         self.__sid = None
@@ -118,12 +116,12 @@ class TIIPMessage(object):
             yield 'ten', self.__ten
 
     @staticmethod
-    def __getTimeStamp():
+    def getTimeStamp():
         """
         Creates a timestamp string representation according to the TIIP-specification for timestamps.
         @return:
         """
-        return dt.now(tz(td(seconds=time.localtime().tm_gmtoff))).isoformat()
+        return dt.utcnow().isoformat(timespec='microseconds') + 'Z'
 
     @property
     def pv(self):
@@ -137,13 +135,21 @@ class TIIPMessage(object):
     def ts(self, value):
         if isinstance(value, str) or isinstance(value, unicode) or isinstance(value, bytes):
             try:
-                parser.parse(value)
+                dateObj = parser.parse(value)
             except ValueError:
                 raise ValueError('timestamp string must be parseable to datetime')
-            else:
-                self.__ts = value
+            if dateObj.utcoffset() not in [None, td(0)]:
+                raise ValueError('timestamp string must be in utc timezone')
+            if value[-1] != 'Z' or value[19] != '.':
+                raise ValueError('seconds must be decimals and end with Z')
+            self.__ts = value
         elif isinstance(value, dt):
-            self.__ts = value.isoformat()
+            if value.utcoffset() not in [None, td(0)]:
+                raise ValueError('timestamp string must be in utc timezone')
+            iso = value.isoformat(timespec='microseconds')
+            if iso.endswith("+00:00"):
+                iso = iso[:-6]
+            self.__ts = iso + 'Z'
         else:
             raise TypeError('timestamp can only be of types datetime or a valid unicode or string representation of a iso 6801')
 
@@ -340,8 +346,8 @@ class TIIPMessage(object):
                     ct = float(tiipDict['ct'])
                     ts = float(tiipDict['ts'])
                     tiipDict['ts'] = str(ct)
-                    tiipDict['lat'] = str(ts-ct)
-                tiipDict['ts'] = dt.fromtimestamp(float(tiipDict['ts'])).isoformat()
+                    tiipDict['lat'] = str(ts - ct)
+                tiipDict['ts'] = dt.utcfromtimestamp(float(tiipDict['ts'])).isoformat(timespec='microseconds') + 'Z'
 
         if 'ts' in tiipDict:
             self.ts = tiipDict['ts']
@@ -388,4 +394,3 @@ class TIIPMessage(object):
             return json.dumps(tiipDict)
         else:
             raise ValueError('Incorrect tiip version. Can only handle versions: tiip.2.0 and tiip.3.0')
-
