@@ -23,7 +23,7 @@ class TestTIIPMessage(unittest.TestCase):
         self.tiipVersion = tiip.__version__
 
         # Key examples
-        self.timestamp = u'2000-01-01T01:23:45.678901+02:00'
+        self.timestamp = u'2000-01-01T01:23:45.678901Z'
         self.latency = u'987654321.987'
         self.mid = u'testMid'
         self.sid = u'testSid'
@@ -134,6 +134,7 @@ class TestTIIPMessage(unittest.TestCase):
         tiipMessage.ts = self.timestamp
         self.assertEqual(tiipMessage.ts, self.timestamp)
         tiipMessage.ts = parser.parse(self.timestamp)
+        print(tiipMessage.ts)
         self.assertEqual(tiipMessage.ts, self.timestamp)
 
         # Incorrect
